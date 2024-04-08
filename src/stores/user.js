@@ -78,7 +78,5 @@ export const useUserStore = defineStore('user', {
 
             this.getMe()
         },
-
-
     }
 })

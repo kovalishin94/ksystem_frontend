@@ -36,29 +36,31 @@
                             {{ `${test.created_by.first_name} ${test.created_by.last_name} ` }}
                         </td>
                         <td class="px-6 py-4 text-wrap break-all">
-                            <RouterLink :to="{ name: 'test-edit', params: { id: test.id } }"
-                                class="inline-block font-medium text-gray-600">
-                                <div class="tooltip" data-tip="Редактировать">
-                                    <svg class="h-6 w-6 hover:scale-125" data-slot="icon" aria-hidden="true" fill="none"
-                                        stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                                            stroke-linecap="round" stroke-linejoin="round"></path>
-                                    </svg>
-                                </div>
-                            </RouterLink>
+                            <div class="inline-flex" v-if="checkPermisssions">
+                                <RouterLink :to="{ name: 'test-edit', params: { id: test.id } }"
+                                    class="inline-block font-medium text-gray-600">
+                                    <div class="tooltip" data-tip="Редактировать">
+                                        <svg class="h-6 w-6 hover:scale-125" data-slot="icon" aria-hidden="true" fill="none"
+                                            stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                                                stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
+                                    </div>
+                                </RouterLink>
 
-                            <button @click="showModal(test)" class="inline-block font-medium text-red-600 ms-3">
-                                <div class="tooltip" data-tip="Удалить">
-                                    <svg class="h-6 w-6 text-red-600 hover:scale-125" data-slot="icon" aria-hidden="true"
-                                        fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round">
-                                        </path>
-                                    </svg>
-                                </div>
-                            </button>
+                                <button @click="showModal(test)" class="inline-block font-medium text-red-600 ms-3">
+                                    <div class="tooltip" data-tip="Удалить">
+                                        <svg class="h-6 w-6 text-red-600 hover:scale-125" data-slot="icon"
+                                            aria-hidden="true" fill="none" stroke-width="1.5" stroke="currentColor"
+                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </button>
+                            </div>
                             <div v-if="!validList.includes(test.id)" class="tooltip text-gray-700 inline-block ms-3"
                                 data-tip="Тест не готов к прохождению">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -129,7 +131,7 @@
                                 </p>
                             </div>
                         </td>
-                        <td class="px-5 py-3">
+                        <td class="px-5 py-3 flex">
                             <button @click="createNewTest"
                                 class="mx-2 rounded-md px-12 py-1.5 font-semibold text-white shadow-sm text-sm bg-emerald-600 hover:bg-emerald-500">
                                 Сохранить
@@ -143,12 +145,12 @@
                 </tfoot>
             </table>
         </div>
-        <button v-if="!newTestMode" @click="newTestMode = true"
+        <button v-if="!newTestMode && checkPermisssions" @click="newTestMode = true"
             class="my-3 rounded-md px-12 py-1.5 font-semibold text-white shadow-sm text-sm bg-gray-600 hover:bg-gray-500">
             Добавить новый тест
         </button>
     </div>
-    <KsystemDeleteDialog v-model:show="showDeleteModal" @accept="deleteTest(deleteCurTest)">
+    <KsystemDeleteDialog v-if="checkPermisssions" v-model:show="showDeleteModal" @accept="deleteTest(deleteCurTest)">
         <template v-slot:modal-title>
             Удаление теста
         </template>
@@ -164,15 +166,28 @@ import { initFlowbite } from 'flowbite'
 import { RouterLink } from 'vue-router'
 import { useToastStore } from '@/stores/toast'
 import { onMounted } from 'vue'
+import { useUserStore } from '@/stores/user'
 
 export default {
     setup() {
         const toastStore = useToastStore()
+        const userStore = useUserStore()
+
         onMounted(() => {
             initFlowbite()
         })
+
         return {
-            toastStore
+            toastStore, userStore
+        }
+    },
+    computed: {
+        checkPermisssions() {
+            let allow = false
+            this.userStore.user.profile.permissions.forEach(el => {
+                if (el.name === 'adm' || el.name === 'tst') { allow = true }
+            })
+            return allow
         }
     },
     data() {
@@ -193,6 +208,7 @@ export default {
     },
     mounted() {
         this.getTestList()
+        console.log(this.userStore.user)
     },
     methods: {
         showModal(name) {
