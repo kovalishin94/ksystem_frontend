@@ -1,16 +1,16 @@
 <template>
     <div class="m-4">
-        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table class="table-fixed w-full text-sm text-left text-gray-500">
+        <div class="relative overflow-x-scroll shadow-md sm:rounded-lg">
+            <table class="table table-auto w-full text-sm text-left text-gray-500">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" class="px-6 py-3 text-wrap">
                             Наименование теста
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" class="px-6 py-3 text-wrap">
                             Количество попыток
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" class="px-6 py-3 text-wrap">
                             Количество использованных попыток
                         </th>
                         <th scope="col" class="px-6 py-3">
@@ -23,93 +23,97 @@
                 </thead>
                 <tbody v-if="testList.length">
                     <tr v-for=" test  in  testList " :key="test.id" class="bg-white border-b hover:bg-gray-50">
-                        <td scope="row" class="px-6 py-4 font-medium text-gray-900 text-wrap break-all">
+                        <td scope="row" class="max-w-md px-6 py-4 font-medium text-gray-900 text-wrap break-all">
                             {{ test.name }}
                         </td>
-                        <td class="px-6 py-4 text-wrap break-all">
+                        <td class="px-6 py-4 w-10">
                             {{ test.possible_attempts }}
                         </td>
-                        <td class="px-6 py-4 text-wrap break-all">
+                        <td class="px-6 py-4 w-10">
                             {{ countResults[test.id] }}
                         </td>
-                        <td class="px-6 py-4 text-wrap break-all">
+                        <td class="px-6 py-4 text-nowrap">
                             {{ `${test.created_by.first_name} ${test.created_by.last_name} ` }}
                         </td>
-                        <td class="px-6 py-4 text-wrap break-all">
-                            <div class="inline-flex" v-if="checkPermisssions">
-                                <RouterLink :to="{ name: 'test-edit', params: { id: test.id } }"
-                                    class="inline-block font-medium text-gray-600">
-                                    <div class="tooltip" data-tip="Редактировать">
-                                        <svg class="h-6 w-6 hover:scale-125" data-slot="icon" aria-hidden="true" fill="none"
-                                            stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                                                stroke-linecap="round" stroke-linejoin="round"></path>
-                                        </svg>
-                                    </div>
-                                </RouterLink>
+                        <td class="px-6 py-4 text-nowrap">
+                            <div class="inline-flex items-center">
+                                <div v-if="checkPermisssions">
+                                    <RouterLink :to="{ name: 'test-edit', params: { id: test.id } }"
+                                        class="inline-block font-medium text-gray-600">
+                                        <div class="tooltip" data-tip="Редактировать">
+                                            <svg class="h-6 w-6 hover:scale-125" data-slot="icon" aria-hidden="true"
+                                                fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                                                    stroke-linecap="round" stroke-linejoin="round"></path>
+                                            </svg>
+                                        </div>
+                                    </RouterLink>
 
-                                <button @click="showModal(test)" class="inline-block font-medium text-red-600 ms-3">
-                                    <div class="tooltip" data-tip="Удалить">
-                                        <svg class="h-6 w-6 text-red-600 hover:scale-125" data-slot="icon"
-                                            aria-hidden="true" fill="none" stroke-width="1.5" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                </button>
+                                    <button @click="showModal(test)" class="inline-block font-medium text-red-600 ms-3">
+                                        <div class="tooltip" data-tip="Удалить">
+                                            <svg class="h-6 w-6 text-red-600 hover:scale-125" data-slot="icon"
+                                                aria-hidden="true" fill="none" stroke-width="1.5" stroke="currentColor"
+                                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                    </button>
 
-                                <RouterLink :to="{ name: 'test-result-all', params: { id: test.id } }"
-                                    class="inline-block font-medium text-gray-600 ms-3">
-                                    <div class="tooltip" data-tip="Посмотреть результаты всех">
+                                    <RouterLink :to="{ name: 'test-result-all', params: { id: test.id } }"
+                                        class="inline-block font-medium text-gray-600 ms-3">
+                                        <div class="tooltip" data-tip="Посмотреть результаты всех">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6 hover:scale-125">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 1.5v-1.5m0 0c0-.621.504-1.125 1.125-1.125m0 0h7.5" />
+                                            </svg>
+                                        </div>
+                                    </RouterLink>
+                                </div>
+                                <div v-if="!validList.includes(test.id)" class="tooltip text-gray-700 ms-3 mb-2"
+                                    data-tip="Тест не готов к прохождению">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="w-6 h-6 cursor-not-allowed">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                    </svg>
+                                </div>
+                                <div v-else-if="test.possible_attempts === countResults[test.id]"
+                                    class="tooltip text-gray-700 inline-block ms-3" data-tip="Исчерпаны все попытки">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="w-6 h-6 cursor-not-allowed">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                    </svg>
+                                </div>
+                                <RouterLink v-else :to="{ name: 'test-solve', params: { id: test.id } }"
+                                    class="text-gray-700 inline-block ms-3">
+                                    <div class="tooltip" data-tip="Пройти тест">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 hover:scale-125">
+                                            stroke-width="1.5" stroke="currentColor"
+                                            class="w-6 h-6 hover:text-emerald-500 hover:scale-125">
                                             <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 1.5v-1.5m0 0c0-.621.504-1.125 1.125-1.125m0 0h7.5" />
+                                                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                        </svg>
+                                    </div>
+                                </RouterLink>
+                                <RouterLink v-if="countResults[test.id]"
+                                    :to="{ name: 'test-result', params: { id: test.id } }"
+                                    class="text-gray-700 inline-block ms-3">
+                                    <div class="tooltip" data-tip="Посмотреть результаты">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor"
+                                            class="w-6 h-6 hover:text-emerald-500 hover:scale-105">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
                                         </svg>
                                     </div>
                                 </RouterLink>
                             </div>
-                            <div v-if="!validList.includes(test.id)" class="tooltip text-gray-700 inline-block ms-3"
-                                data-tip="Тест не готов к прохождению">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor" class="w-6 h-6 cursor-not-allowed">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                                </svg>
-                            </div>
-                            <div v-else-if="test.possible_attempts === countResults[test.id]"
-                                class="tooltip text-gray-700 inline-block ms-3" data-tip="Исчерпаны все попытки">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor" class="w-6 h-6 cursor-not-allowed">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                                </svg>
-                            </div>
-                            <RouterLink v-else :to="{ name: 'test-solve', params: { id: test.id } }"
-                                class="text-gray-700 inline-block ms-3">
-                                <div class="tooltip" data-tip="Пройти тест">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-6 h-6 hover:text-emerald-500 hover:scale-125">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                                    </svg>
-                                </div>
-                            </RouterLink>
-                            <RouterLink v-if="countResults[test.id]" :to="{ name: 'test-result', params: { id: test.id } }"
-                                class="text-gray-700 inline-block ms-3">
-                                <div class="tooltip" data-tip="Посмотреть результаты">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-6 h-6 hover:text-emerald-500 hover:scale-105">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-                                    </svg>
-                                </div>
-                            </RouterLink>
                         </td>
                     </tr>
                 </tbody>
