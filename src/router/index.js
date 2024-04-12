@@ -14,6 +14,7 @@ import TestEditView from '@/views/test/TestEditView.vue'
 import TestSolveView from '@/views/test/TestSolveView.vue'
 import TestForbiddenView from '@/views/test/TestForbiddenView.vue'
 import TestResultsView from '@/views/test/TestResultsView.vue'
+import TestResultsAllView from '@/views/test/TestResultsAllView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -108,6 +109,14 @@ const router = createRouter({
       path: '/test/:id/result',
       name: 'test-result',
       component: TestResultsView,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/test/:id/result-all',
+      name: 'test-result-all',
+      component: TestResultsAllView,
       meta: {
         requiresAuth: true
       }
