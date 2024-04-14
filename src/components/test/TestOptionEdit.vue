@@ -8,7 +8,10 @@
                         <path fill="currentColor"
                             d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8s-8-3.58-8-8s3.58-8 8-8m0 13c2.76 0 5-2.24 5-5s-2.24-5-5-5s-5 2.24-5 5s2.24 5 5 5" />
                     </svg>
-                    {{ option.body }}
+                    <div v-for="line in option.body_array" class="inline">
+                        <br v-if="option.body_array.indexOf(line) !== 0">                    
+                        {{ line }}
+                    </div>
                     <button class="inline-block py-2 px-2 rounded-lg hover:scale-110" @click="patchOption">
                         <svg class="h-4 w-4" data-slot="icon" aria-hidden="true" fill="none" stroke-width="1.5"
                             stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

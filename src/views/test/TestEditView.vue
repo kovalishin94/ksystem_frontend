@@ -170,9 +170,11 @@ export default {
                 this.testQuestions.forEach(question => {
                     response.data.options.forEach(option => {
                         if (option.question === question.id) {
+                            option.body_array = option.body.split('\n')
                             question.options.push(option)
                         }
                     })
+                    question.body_array = question.body.split('\n')
                 })
             } catch (error) {
                 this.toastStore.showToast(5000, 'Неизвестная ошибка', 'bg-red-500')

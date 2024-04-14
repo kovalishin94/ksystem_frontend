@@ -9,15 +9,19 @@
                     :style="`width: ${progressTest}%`"> {{ progressTest }}%</div>
             </div>
         </div>
-
-
-        <div class="flex flex-col p-2 shadow-2xl">
-            <p class="text-xl font-bold text-wrap break-all">{{ testQuestions[currentQuestion].body }}</p>
+        <div class="flex flex-col p-5 shadow-2xl">
+            <p v-for="line in testQuestions[currentQuestion].body_array" class="text-xl font-bold text-wrap break-all">{{ line }}</p>
+            <div v-if="testQuestions[currentQuestion].image" class="w-64">
+                    <img :src="testQuestions[currentQuestion].image">
+                </div>
             <div class="p-4 text-wrap break-all">
                 <p v-for="option in testQuestions[currentQuestion].options" :key="option.id"
                     @click="selectOption(option.id)" :class="{ 'bg-emerald-300': selectedOptions.includes(option.id) }"
                     class="mb-3 p-2 w-fit cursor-pointer rounded-lg hover:bg-emerald-200">
-                    {{ option.body }}
+                    <div v-for="opt_line in option.body_array" class="inline">
+                        <br v-if="option.body_array.indexOf(opt_line) !== 0">                 
+                        {{ opt_line }}
+                    </div>
                 </p>
             </div>
         </div>
@@ -122,9 +126,11 @@ export default {
                 this.testQuestions.forEach(question => {
                     response.data.options.forEach(option => {
                         if (option.question === question.id) {
+                            option.body_array = option.body.split('\n')
                             question.options.push(option)
                         }
                     })
+                    question.body_array = question.body.split('\n')
                 })
                 this.getCurrentAnswers()
             } catch (error) {

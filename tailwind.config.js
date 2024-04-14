@@ -13,4 +13,5 @@ export default {
     require('flowbite/plugin'),
     require("daisyui"),
   ],
+  darkMode: 'media',
 }

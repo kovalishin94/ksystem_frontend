@@ -2,8 +2,11 @@
     <div class="flex flex-col p-4 shadow-lg">
         <div class="flex">
             <div class="grow mb-2" :class="[editableMode ? 'hidden' : 'block']">
-                <p class="text-lg font-bold text-wrap break-all">
-                    {{ question.body }}
+                <div v-if="question.body.length" class="text-lg font-bold text-wrap break-all">
+                    <div v-for="line in question.body_array" class="inline">
+                        <br v-if="question.body_array.indexOf(line) !== 0">                    
+                        {{ line }}
+                    </div>
                     <button class="inline-block py-1 px-1 hover:scale-105" @click="patchQuestion">
                         <svg class="h-6 w-6" data-slot="icon" aria-hidden="true" fill="none" stroke-width="1.5"
                             stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -13,20 +16,25 @@
                         </svg>
                     </button>
                     <button class="inline-block py-1 px-1 hover:scale-105" @click="deleteQuestion">
-                        <svg class="h-7 w-7 text-red-600" data-slot="icon" aria-hidden="true" fill="none" stroke-width="1.5"
-                            stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="h-7 w-7 text-red-600" data-slot="icon" aria-hidden="true" fill="none"
+                            stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
                             <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     </button>
-                </p>
+                </div>
                 <p class="text-xs" v-if="question.many_answers">(Несколько ответов)</p>
+                <div v-if="question.image" class="w-64">
+                    <img :src="question.image">
+                </div>
             </div>
             <div :class="{ 'hidden': !editableMode }" class="flex flex-col w-full gap-y-2">
-                <div class="flex">
+                <div>
                     <div class="w-full">
                         <textarea :value="question.body" @input="updateQuestionBody" rows="1"
                             :class="[validationQuestionErrors.length ? 'border-red-600 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500']"
-                            class="block p-2.5 w-full text-lg text-gray-900 bg-gray-50 rounded-lg border" placeholder="">
+                            class="block p-2.5 w-full text-lg text-gray-900 bg-gray-50 rounded-lg border"
+                            placeholder="">
                         </textarea>
                         <div v-if="validationQuestionErrors.length">
                             <p class="text-red-600 text-xs" v-for="error in validationQuestionErrors" :key="error">
@@ -34,10 +42,25 @@
                             </p>
                         </div>
                     </div>
-                    <div class="flex">
-                        <label class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Несколько ответов</label>
+                    <div class="flex items-center mt-3 border-2 max-w-fit p-2 rounded-lg border-gray-300">
+                        <label class="mx-2 text-sm font-medium text-gray-900 dark:text-gray-300">Несколько
+                            ответов</label>
                         <input type="checkbox" :checked="question.many_answers" @input="updateManyAnswers"
                             class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500">
+                        <label
+                            class="mx-3 text-center rounded-md bg-gray-500 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-gray-600 cursor-pointer inline-block">
+                            Загрузить изображение...
+                            <input ref="photo" @change="imageUpload" type="file" class="hidden" accept="image/png, image/jpeg">
+                        </label>
+                        <div class="flex mr-3" v-if="question.image">
+                            <button @click="deleteImage" class="text-center rounded-md bg-red-500 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-600 cursor-pointer inline-block">
+                                Удалить текущее
+                            </button>
+                        </div>
+                        <div class="flex gap-x-2 items-center" v-if="imageInfo">
+                            <button class="text-center rounded-md bg-gray-500 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-gray-600 cursor-pointer inline-block" @click="imageClear">Очистить</button>
+                            <div>Выбран файл: {{ imageInfo }}</div>
+                        </div>
                     </div>
                 </div>
                 <div class="flex gap-x-2">
@@ -52,8 +75,8 @@
                 </div>
             </div>
         </div>
-        <TestOptionEdit v-for="option in question.options" :key="option.id" :option="option" @updateOption="updateOption"
-            @updateInfo="$emit('updateInfo')" />
+        <TestOptionEdit v-for="option in question.options" :key="option.id" :option="option"
+            @updateOption="updateOption" @updateInfo="$emit('updateInfo')" />
         <div class="flex flex-col gap-y-2 mb-2 ml-5">
             <div v-if="showNewOptionForm" class="flex gap-x-2">
                 <div class="w-full">
@@ -91,6 +114,7 @@
 import axios from 'axios'
 import { useToastStore } from '@/stores/toast'
 import TestOptionEdit from '@/components/test/TestOptionEdit.vue'
+import { compile } from 'vue'
 
 export default {
     name: 'TestQuestionEdit',
@@ -112,10 +136,20 @@ export default {
             newOptionBody: '',
             newOptionIsTrue: false,
             validationQuestionErrors: [],
-            validationOptionErrors: []
+            validationOptionErrors: [],
+            imageInfo: ''
         }
     },
     methods: {
+        imageClear(){
+            this.$refs.photo.value = ''
+            this.imageInfo = ''
+        },
+        imageUpload(){
+            if(this.$refs.photo.files.length){
+                this.imageInfo = this.$refs.photo.files[0].name
+            }
+        },
         updateQuestionBody(event) {
             this.$emit('update:modelValue', event.target.value)
         },
@@ -130,6 +164,21 @@ export default {
             this.editableMode = false
             this.validationQuestionErrors = []
         },
+        async deleteImage(){
+            const formData = new FormData()
+            formData.append('image', '')
+            try {
+                const response = await axios.patch(`/api/test/questions/${this.question.id}/`, formData)
+                this.editableMode = false
+                this.$emit('updateInfo')
+            } catch (error) {
+                if (error.code === 'ERR_BAD_REQUEST') {
+                    this.validationQuestionErrors = error.response.data.body
+                    return
+                }
+                this.toastStore.showToast(5000, 'Ошибка сервера', 'bg-red-500')
+            }
+        },
         async patchQuestion() {
             if (!this.editableMode) {
                 this.editableMode = true
@@ -137,15 +186,24 @@ export default {
             }
             this.validationQuestionErrors = []
             try {
-                const response = await axios.patch(`/api/test/questions/${this.question.id}/`, {
-                    body: this.question.body,
-                    many_answers: this.question.many_answers
-                })
+                const formData = new FormData()
+                formData.append('body', this.question.body)
+                formData.append('many_answers', this.question.many_answers)
+                if (this.$refs.photo.files[0]) {
+                    formData.append('image', this.$refs.photo.files[0])
+                }
+                const response = await axios.patch(`/api/test/questions/${this.question.id}/`, formData)
                 this.editableMode = false
                 this.$emit('updateInfo')
             } catch (error) {
                 if (error.code === 'ERR_BAD_REQUEST') {
-                    this.validationQuestionErrors = error.response.data.body
+                    console.log(error)
+                    if (error.response.data.body){
+                        this.validationQuestionErrors = error.response.data.body
+                    }
+                    if(error.response.data.image){
+                        this.validationQuestionErrors = [...this.validationQuestionErrors, ...error.response.data.image]
+                    }
                     return
                 }
                 this.toastStore.showToast(5000, 'Ошибка сервера', 'bg-red-500')
