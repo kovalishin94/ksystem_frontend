@@ -24,7 +24,7 @@
                     </button>
                 </div>
                 <p class="text-xs" v-if="question.many_answers">(Несколько ответов)</p>
-                <div v-if="question.image" class="w-64">
+                <div v-if="question.image" class="max-w-lg">
                     <img :src="question.image">
                 </div>
             </div>

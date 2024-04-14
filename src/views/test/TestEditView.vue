@@ -33,7 +33,8 @@
                     class="bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5"
                     placeholder="Введите количество попыток" />
                 <div v-if="validationTestErrors.possible_attempts.length">
-                    <p class="text-red-600 text-xs" v-for="error in validationTestErrors.possible_attempts" :key="error">
+                    <p class="text-red-600 text-xs" v-for="error in validationTestErrors.possible_attempts"
+                        :key="error">
                         {{ error }}
                     </p>
                 </div>
@@ -55,7 +56,7 @@
                 @updateInfo="getTestQuestionsAndOptions" />
         </div>
         <div class="mt-3 flex flex-col items-center gap-y-3">
-            <div v-if="showNewQuestionForm" class="flex w-full">
+            <div v-if="showNewQuestionForm" class="w-full">
                 <div class="w-full">
                     <textarea rows="1" v-model="newQuestionBody"
                         :class="[validationQuestionErrors.length ? 'border-red-600 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500']"
@@ -67,10 +68,21 @@
                         </p>
                     </div>
                 </div>
-                <div class="flex">
-                    <label class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Несколько ответов</label>
+                <div class="flex mt-2 items-center border-2 max-w-fit p-2 rounded-lg border-gray-300">
+                    <label class="mx-2 text-sm font-medium text-gray-900 dark:text-gray-300">Несколько ответов</label>
                     <input type="checkbox" v-model="newQuestionManyAnswers"
                         class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500">
+                    <label
+                        class="mx-3 text-center rounded-md bg-gray-500 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-gray-600 cursor-pointer inline-block">
+                        Загрузить изображение...
+                        <input @change="imageUpload" ref="photo" type="file" class="hidden" accept="image/png, image/jpeg">
+                    </label>
+                    <div class="flex gap-x-2 items-center" v-if="imageInfo">
+                        <button
+                            class="text-center rounded-md bg-gray-500 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-gray-600 cursor-pointer inline-block"
+                            @click="imageClear">Очистить</button>
+                        <div>Выбран файл: {{ imageInfo }}</div>
+                    </div>
                 </div>
             </div>
             <div class="flex gap-x-2">
@@ -114,7 +126,8 @@ export default {
                 name: [],
                 possible_attempts: []
             },
-            validationQuestionErrors: []
+            validationQuestionErrors: [],
+            imageInfo: '',
         }
     },
     mounted() {
@@ -122,6 +135,15 @@ export default {
         this.getTestQuestionsAndOptions()
     },
     methods: {
+        imageClear(){
+            this.$refs.photo.value = ''
+            this.imageInfo = ''
+        },
+        imageUpload(){
+            if(this.$refs.photo.files.length){
+                this.imageInfo = this.$refs.photo.files[0].name
+            }
+        },
         updateOption(data, id, type) {
             this.testQuestions.forEach(question => {
                 question.options.forEach(el => {
@@ -144,13 +166,18 @@ export default {
             }
             this.validationQuestionErrors = []
             try {
-                const response = await axios.post('/api/test/questions/', {
-                    body: this.newQuestionBody,
-                    many_answers: this.newQuestionManyAnswers,
-                    test: this.$route.params.id
-                })
+                const formData = new FormData()
+                formData.append('body', this.newQuestionBody)
+                formData.append('many_answers', this.newQuestionManyAnswers)
+                formData.append('test', this.$route.params.id)
+                if (this.imageInfo){
+                    formData.append('image', this.$refs.photo.files[0])
+                }
+                const response = await axios.post('/api/test/questions/', formData)
                 response.data.options = []
-                this.testQuestions.push(response.data)
+                const question = response.data
+                question.body_array = question.body.split('\n')
+                this.testQuestions.push(question)
                 this.newQuestionBody = ''
                 this.newQuestionManyAnswers = false
                 this.showNewQuestionForm = false

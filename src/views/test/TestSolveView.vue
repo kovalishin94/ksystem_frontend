@@ -6,12 +6,12 @@
             <h1 class="text-sm">Прогресс выполенния теста</h1>
             <div class="bg-gray-200 rounded-full">
                 <div class="bg-emerald-500 text-xs font-medium text-gray-900 text-center p-0.5 leading-none rounded-full"
-                    :style="`width: ${progressTest}%`"> {{ progressTest }}%</div>
+                    :style="`width: ${progressTest}%`"> {{ progressTest.toFixed(1) }}%</div>
             </div>
         </div>
         <div class="flex flex-col p-5 shadow-2xl">
             <p v-for="line in testQuestions[currentQuestion].body_array" class="text-xl font-bold text-wrap break-all">{{ line }}</p>
-            <div v-if="testQuestions[currentQuestion].image" class="w-64">
+            <div v-if="testQuestions[currentQuestion].image" class="max-w-lg">
                     <img :src="testQuestions[currentQuestion].image">
                 </div>
             <div class="p-4 text-wrap break-all">
