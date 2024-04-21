@@ -112,9 +112,29 @@ export default {
         }
     },
     mounted() {
-        this.getChatList()        
+        this.getChatList()             
     },
     methods: {
+        connectWS(){
+            const chatSocket = new WebSocket(
+                'ws://'
+                + import.meta.env.VITE_API_URL
+                + '/ws/chat/'
+                + this.activeChatId
+                + '/'
+                + '?token='
+                + this.userStore.user.accessToken
+            )
+            chatSocket.onmessage = function (e) {
+                const data = JSON.parse(e.data)
+            }
+            
+
+            chatSocket.onclose = function (e) {
+                console.error('Chat socket closed unexpectedly')
+            }
+        },
+
         chatClick(id) {
             this.activeChatId = id
             this.chatListToggle = false
@@ -132,6 +152,7 @@ export default {
                 if (response.data.length) {
                     this.activeChatId = response.data[0].id
                 }
+                this.connectWS()
             } catch (error) {
                 if (error.message = 'Network Error') {
                     this.toastStore.showToast(5000, 'Ошибка сервера', 'bg-red-500')
