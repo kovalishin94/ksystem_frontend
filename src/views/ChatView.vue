@@ -103,38 +103,56 @@ export default {
                 id: '',
                 firstName: '',
                 lastName: '',
-            }
+            },
+            chatSocket: null,
+            closeWs: null,
         }
     },
     watch: {
         activeChatId(newVal) {
-            this.getMessages(newVal)
+            if (this.chatSocket) {
+                this.chatSocket.send(
+                    JSON.stringify({
+                        close: 'close'
+                    })
+                )
+            }
+            this.connectWS()
         }
     },
     mounted() {
-        this.getChatList()             
+        this.getChatList()
     },
     methods: {
-        connectWS(){
-            const chatSocket = new WebSocket(
-                'ws://'
+        connectWS() {
+            const url = 'ws://'
                 + import.meta.env.VITE_API_URL
                 + '/ws/chat/'
                 + this.activeChatId
                 + '/'
                 + '?token='
                 + this.userStore.user.accessToken
-            )
-            chatSocket.onmessage = function (e) {
-                const data = JSON.parse(e.data)
-            }
-            
 
-            chatSocket.onclose = function (e) {
+            this.chatSocket = new WebSocket(url)
+
+            this.chatSocket.onmessage = (e) => {
+                const data = JSON.parse(e.data)
+                if (data instanceof Array) {
+                    this.chatMessages = data
+                    return
+                }
+                this.chatMessages.push(data)
+            }
+            const interval = setInterval(() => {
+                this.chatSocket.send(JSON.stringify({
+                    ping: 'ping'
+                }))
+            }, 7000)
+            this.chatSocket.onclose = function (e) {
                 console.error('Chat socket closed unexpectedly')
+                clearInterval(interval)
             }
         },
-
         chatClick(id) {
             this.activeChatId = id
             this.chatListToggle = false
@@ -152,7 +170,6 @@ export default {
                 if (response.data.length) {
                     this.activeChatId = response.data[0].id
                 }
-                this.connectWS()
             } catch (error) {
                 if (error.message = 'Network Error') {
                     this.toastStore.showToast(5000, 'Ошибка сервера', 'bg-red-500')
@@ -161,14 +178,14 @@ export default {
                 }
             }
         },
-        async getMessages(id) {
-            try {
-                const response = await axios.get(`/api/chat/${id}/`)
-                this.chatMessages = response.data
-            } catch (error) {
-                console.log(error)
-            }
-        },
+        // async getMessages(id) {
+        //     try {
+        //         const response = await axios.get(`/api/chat/${id}/`)
+        //         this.chatMessages = response.data
+        //     } catch (error) {
+        //         console.log(error)
+        //     }
+        // },
         async deleteChat() {
             try {
                 const response = await axios.delete(`/api/chat/${this.chatDeleteInfo.id}/delete/`)
@@ -177,15 +194,21 @@ export default {
                 console.log(error)
             }
         },
-        async sendMessage() {
-            try {
-                const response = await axios.post(`/api/chat/${this.activeChatId}/send/`, { body: this.messageBody })
-                this.chatMessages.push(response.data)
-                this.messageBody = ''
-                this.getChatList()
-            } catch (error) {
-                console.log(error)
-            }
+        // async sendMessage() {
+        //     try {
+        //         const response = await axios.post(`/api/chat/${this.activeChatId}/send/`, { body: this.messageBody })
+        //         this.chatMessages.push(response.data)
+        //         this.messageBody = ''
+        //         this.getChatList()
+        //     } catch (error) {
+        //         console.log(error)
+        //     }
+        // },
+        sendMessage() {
+            this.chatSocket.send(JSON.stringify({
+                body: this.messageBody
+            }))
+            this.messageBody = ''
         },
         newLine(e) {
             let caret = e.target.selectionStart;
