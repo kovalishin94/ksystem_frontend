@@ -125,8 +125,7 @@ export default {
     },
     methods: {
         connectWS() {
-            const url = 'ws://'
-                + import.meta.env.VITE_API_HOST
+            const url = import.meta.env.VITE_API_WS
                 + '/ws/chat/'
                 + this.activeChatId
                 + '/'
