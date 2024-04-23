@@ -105,11 +105,11 @@ export default {
                 lastName: '',
             },
             chatSocket: null,
-            closeWs: null,
         }
     },
     watch: {
         activeChatId(newVal) {
+            this.getMessages(newVal)
             if (this.chatSocket) {
                 this.chatSocket.send(
                     JSON.stringify({
@@ -136,10 +136,10 @@ export default {
 
             this.chatSocket.onmessage = (e) => {
                 const data = JSON.parse(e.data)
-                if (data instanceof Array) {
-                    this.chatMessages = data
-                    return
-                }
+                // if (data instanceof Array) {
+                //     this.chatMessages = data
+                //     return
+                // }
                 this.chatMessages.push(data)
             }
             const interval = setInterval(() => {
@@ -177,14 +177,14 @@ export default {
                 }
             }
         },
-        // async getMessages(id) {
-        //     try {
-        //         const response = await axios.get(`/api/chat/${id}/`)
-        //         this.chatMessages = response.data
-        //     } catch (error) {
-        //         console.log(error)
-        //     }
-        // },
+        async getMessages(id) {
+            try {
+                const response = await axios.get(`/api/chat/${id}/`)
+                this.chatMessages = response.data
+            } catch (error) {
+                console.log(error)
+            }
+        },
         async deleteChat() {
             try {
                 const response = await axios.delete(`/api/chat/${this.chatDeleteInfo.id}/delete/`)
