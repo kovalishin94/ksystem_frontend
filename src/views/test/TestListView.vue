@@ -22,8 +22,10 @@
                     </tr>
                 </thead>
                 <tbody v-if="testList.length" class="dark:text-white">
-                    <tr v-for=" test  in  testList " :key="test.id" class="bg-white border-b hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-800 dark:border-gray-700">
-                        <td scope="row" class="max-w-md px-6 py-4 font-medium text-gray-900 text-wrap break-all dark:text-white">
+                    <tr v-for=" test  in  testList " :key="test.id"
+                        class="bg-white border-b hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-800 dark:border-gray-700">
+                        <td scope="row"
+                            class="max-w-md px-6 py-4 font-medium text-gray-900 text-wrap break-all dark:text-white">
                             {{ test.name }}
                         </td>
                         <td class="px-6 py-4 w-10">
@@ -36,7 +38,7 @@
                             {{ `${test.created_by.first_name} ${test.created_by.last_name} ` }}
                         </td>
                         <td class="px-6 py-4">
-                            <div class="inline-flex items-center">
+                            <div class="flex items-baseline">
                                 <div class="flex" v-if="checkPermisssions">
                                     <RouterLink :to="{ name: 'test-edit', params: { id: test.id } }"
                                         class="font-medium text-gray-600">
@@ -82,14 +84,16 @@
                                             d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                                     </svg>
                                 </div>
+
                                 <div v-else-if="test.possible_attempts === countResults[test.id]"
-                                    class="tooltip text-gray-700 inline-block ms-3" data-tip="Исчерпаны все попытки">
+                                    class="flex tooltip text-gray-700 ms-3" data-tip="Исчерпаны все попытки">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="w-6 h-6 cursor-not-allowed">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                                     </svg>
                                 </div>
+
                                 <div class="flex" v-else>
                                     <RouterLink :to="{ name: 'test-solve', params: { id: test.id } }"
                                         class="text-gray-700 ms-3">
