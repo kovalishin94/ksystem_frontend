@@ -103,18 +103,55 @@ export default {
                 id: '',
                 firstName: '',
                 lastName: '',
-            }
+            },
+            chatSocket: null,
         }
     },
     watch: {
         activeChatId(newVal) {
             this.getMessages(newVal)
+            if (this.chatSocket) {
+                this.chatSocket.send(
+                    JSON.stringify({
+                        close: 'close'
+                    })
+                )
+            }
+            this.connectWS()
         }
     },
     mounted() {
-        this.getChatList()        
+        this.getChatList()
     },
     methods: {
+        connectWS() {
+            const url = import.meta.env.VITE_API_WS
+                + '/ws/chat/'
+                + this.activeChatId
+                + '/'
+                + '?token='
+                + this.userStore.user.accessToken
+
+            this.chatSocket = new WebSocket(url)
+
+            this.chatSocket.onmessage = (e) => {
+                const data = JSON.parse(e.data)
+                // if (data instanceof Array) {
+                //     this.chatMessages = data
+                //     return
+                // }
+                this.chatMessages.push(data)
+            }
+            const interval = setInterval(() => {
+                this.chatSocket.send(JSON.stringify({
+                    ping: 'ping'
+                }))
+            }, 7000)
+            this.chatSocket.onclose = function (e) {
+                console.error('Chat socket closed unexpectedly')
+                clearInterval(interval)
+            }
+        },
         chatClick(id) {
             this.activeChatId = id
             this.chatListToggle = false
@@ -156,15 +193,21 @@ export default {
                 console.log(error)
             }
         },
-        async sendMessage() {
-            try {
-                const response = await axios.post(`/api/chat/${this.activeChatId}/send/`, { body: this.messageBody })
-                this.chatMessages.push(response.data)
-                this.messageBody = ''
-                this.getChatList()
-            } catch (error) {
-                console.log(error)
-            }
+        // async sendMessage() {
+        //     try {
+        //         const response = await axios.post(`/api/chat/${this.activeChatId}/send/`, { body: this.messageBody })
+        //         this.chatMessages.push(response.data)
+        //         this.messageBody = ''
+        //         this.getChatList()
+        //     } catch (error) {
+        //         console.log(error)
+        //     }
+        // },
+        sendMessage() {
+            this.chatSocket.send(JSON.stringify({
+                body: this.messageBody
+            }))
+            this.messageBody = ''
         },
         newLine(e) {
             let caret = e.target.selectionStart;

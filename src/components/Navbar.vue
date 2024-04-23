@@ -54,7 +54,7 @@
                 </div>
             </div>
         </div>
-        <div v-show="isMobileMenuShow && userStore.user.isAuthenticated" class="sm:hidden absolute bg-gray-800 w-full"
+        <div v-show="isMobileMenuShow && userStore.user.isAuthenticated" class="sm:hidden absolute bg-gray-800 w-full z-10"
             id="mobile-menu">
             <div class="space-y-1 px-2 pb-3 pt-2">
                 <RouterLink v-for="link in linkList" :key="link.name" :to="{ name: link.name }" :class="[

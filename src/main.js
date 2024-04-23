@@ -8,8 +8,6 @@ import router from './router'
 import axios from 'axios'
 import uiComponents from '@/components/UI'
 
-
-// axios.defaults.baseURL = 'https://api.24kovalishin.ru'
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
 
 const app = createApp(App)
