@@ -4,23 +4,23 @@
             <table class="table-fixed w-full text-sm text-left text-gray-500">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" class="px-6 py-3 w-[300px]">
                             Пользователь
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" class="px-6 py-3 w-[100px]">
                             Номер попытки
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" class="px-6 py-3 w-[100px]">
                             Результат
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" class="px-6 py-3 w-[300px]">
                             Дата прохождения
                         </th>
                     </tr>
                 </thead>
                 <tbody v-if="resultList.length">
                     <tr v-for=" result  in resultList " :key="result.id" class="bg-white border-b hover:bg-gray-50">
-                        <td scope="row" class="px-6 py-4 font-medium text-gray-900 text-wrap break-all">
+                        <td scope="row" class="px-6 py-4 font-medium text-gray-900 text-wrap break-words">
                             <div class="inline-flex items-center gap-x-4">
                                 <div>
                                     <img v-if="result.user.profile.photo"
