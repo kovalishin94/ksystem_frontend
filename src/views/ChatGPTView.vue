@@ -17,19 +17,19 @@
             <div v-for="message in chatMessages" :key="message.id" class="flex flex-col">
                 <div
                     class="self-end bg-emerald-500 text-white m-3 p-3 text-balance break-words max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl rounded-l-lg rounded-br-lg">
-                    {{ message.question.body }}
+                    <pre class="break-words whitespace-pre-wrap">{{ message.question.body }}</pre>
                     <div class="mt-3 text-end text-xs">
                         {{ message.human_created_at }}
                     </div>
                 </div>
                 <div
                     class="bg-gray-500 text-white m-3 p-3 text-balance break-words max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl rounded-r-lg rounded-bl-lg">
-                    <img v-if="message.answer === 'Фото'" :src="message.image_url">
-                    <figure v-else-if="message.answer === 'Аудио'">
+                    <img v-if="message.answer[0] === 'Фото'" :src="message.image_url">
+                    <figure v-else-if="message.answer[0] === 'Аудио'">
                         <figcaption class="mb-2">Текст конвертирован в речь</figcaption>
                         <audio controls :src="message.speech_url"></audio>
                     </figure>
-                    <p v-else>{{ message.answer }}</p>
+                    <pre v-else class="break-words whitespace-pre-wrap">{{ message.answer }}</pre>
                     <div class="mt-3 text-end text-xs">
                         {{ message.human_created_at }}
                     </div>
