@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 
 
 export const useUserStore = defineStore('user', {
     state: () => ({
+        router: useRouter(),
         user: {
             isAuthenticated: false,
             id: null,
@@ -16,16 +18,17 @@ export const useUserStore = defineStore('user', {
         }
     }),
     actions: {
-        async refreshToken() {
-            try {
-                const response = await axios.post('/api/token/refresh/', { refresh: this.user.refreshToken })
-                this.user.accessToken = response.data.access
-                localStorage.setItem('user.accessToken', response.data.access)
-
-            } catch (error) {
-                console.log(error)
-                this.removeUserData()
-            }
+        refreshToken() {
+            axios.post('/api/token/refresh/', { refresh: this.user.refreshToken })
+                .then(response => {
+                    this.user.accessToken = response.data.access
+                    localStorage.setItem('user.accessToken', response.data.access)
+                    axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.user.accessToken
+                    this.router.go()
+                })
+                .catch(error => {
+                    this.removeUserData()
+                })
         },
         initUser() {
             if (localStorage.getItem('user.accessToken')) {
@@ -35,6 +38,8 @@ export const useUserStore = defineStore('user', {
                 this.user.accessToken = localStorage.getItem('user.accessToken')
                 this.user.refreshToken = localStorage.getItem('user.refreshToken')
                 this.user.profile = JSON.parse(localStorage.getItem('user.profile'))
+
+                axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.user.accessToken
             }
         },
         removeUserData() {
@@ -54,7 +59,7 @@ export const useUserStore = defineStore('user', {
             localStorage.setItem('user.profile', '')
 
             axios.defaults.headers.common['Authorization'] = ''
-
+            this.router.push({ name: 'auth' })
         },
         async getMe() {
             try {
@@ -66,8 +71,7 @@ export const useUserStore = defineStore('user', {
                 this.user.username = response.data.username
                 this.user.profile = response.data.profile
             } catch (error) {
-                console.log(error)
-                this.removeUserData()
+                this.refreshToken()
             }
         },
         setTokens(data) {

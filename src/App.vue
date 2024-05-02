@@ -28,7 +28,6 @@ export default {
 
     beforeCreate() {
         this.userStore.initUser()
-        axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.userStore.user.accessToken
     },
 }
 </script>
